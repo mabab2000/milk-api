@@ -172,4 +172,61 @@ router.post('/login', async (req, res) => {
     }
 });
 
+
+/**
+ * @swagger
+ * /api/user/{id}/role:
+ *   patch:
+ *     summary: Update user role to admin
+ *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: false
+ *     responses:
+ *       200:
+ *         description: User role updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ */
+router.patch('/user/:id/role', async (req, res) => {
+    const { id } = req.params;
+    try {
+        // Check if user exists
+        const userResult = await pool.query('SELECT * FROM register WHERE id = $1', [id]);
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ status: 'error', message: 'User not found.' });
+        }
+        // Update role to admin
+        await pool.query('UPDATE register SET role = $1 WHERE id = $2', ['admin', id]);
+        res.status(200).json({ status: 'success', message: 'User role updated to admin.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ status: 'error', message: 'Failed to update user role.' });
+    }
+});
+
 module.exports = router;
