@@ -1,6 +1,7 @@
 
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const registerRouter = require('./register');
 const migrate = require('./migrate');
 const swaggerUi = require('swagger-ui-express');
@@ -9,6 +10,9 @@ const swaggerJsdoc = require('swagger-jsdoc');
 
 const app = express();
 app.use(express.json());
+
+// Enable CORS for all origins
+app.use(cors());
 
 // Run DB migration on startup
 migrate().then(() => {
