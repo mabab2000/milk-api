@@ -229,4 +229,47 @@ router.patch('/user/:id/role', async (req, res) => {
     }
 });
 
+
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Get all users information
+ *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: List of all users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       500:
+ *         description: Failed to fetch users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ */
+router.get('/users', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id, fullname, phone, username, role, created_at FROM register');
+        res.status(200).json({ status: 'success', users: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ status: 'error', message: 'Failed to fetch users.' });
+    }
+});
+
 module.exports = router;
