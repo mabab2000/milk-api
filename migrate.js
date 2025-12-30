@@ -36,6 +36,19 @@ async function migrate() {
 
   // Add location column if it doesn't exist (for migrations on existing DB)
   await pool.query(`ALTER TABLE collection_center ADD COLUMN IF NOT EXISTS location VARCHAR(255) NOT NULL DEFAULT ''`);
+
+  // Create created_collection table for recording collections
+  const createCreatedCollectionTableQuery = `
+    CREATE TABLE IF NOT EXISTS created_collection (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      collection_center_id UUID NOT NULL REFERENCES collection_center(id) ON DELETE CASCADE,
+      user_id UUID NOT NULL REFERENCES register(id) ON DELETE CASCADE,
+      quantity NUMERIC(10,2) NOT NULL,
+      quality VARCHAR(100),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+  await pool.query(createCreatedCollectionTableQuery);
 }
 
 module.exports = migrate;

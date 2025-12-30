@@ -32,7 +32,7 @@ const swaggerOptions = {
 			description: 'API documentation for Milk Collection endpoints',
 		},
 	},
-	apis: ['./register.js'],
+	apis: ['./register.js', './routes/*.js'],
 };
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
