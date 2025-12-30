@@ -107,36 +107,40 @@ router.delete('/collection-center/:id', async (req, res) => {
     }
 });
 
+
 /**
  * @swagger
- * /api/collection-center/{id}:
+ * /api/user-names:
  *   get:
- *     summary: Get a collection center by ID
- *     tags: [CollectionCenter]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Collection center ID
+ *     summary: Get all user names and ids
+ *     tags: [User]
  *     responses:
  *       200:
- *         description: Collection center data
- *       404:
- *         description: Collection center not found
+ *         description: List of user names and ids
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       fullname:
+ *                         type: string
  */
-router.get('/collection-center/:id', async (req, res) => {
-    const { id } = req.params;
+router.get('/user-names', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM collection_center WHERE id = $1', [id]);
-        if (result.rows.length === 0) {
-            return res.status(404).json({ status: 'error', message: 'Collection center not found.' });
-        }
-        res.status(200).json({ status: 'success', center: result.rows[0] });
+        const result = await pool.query("SELECT id, fullname FROM register WHERE role = 'user'");
+        res.status(200).json({ status: 'success', users: result.rows });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ status: 'error', message: 'Failed to retrieve collection center.' });
+        res.status(500).json({ status: 'error', message: 'Failed to fetch user names.' });
     }
 });
 
