@@ -5,14 +5,45 @@ const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 
 /**
- * @swagger
+ * @openapi
  * /api/register:
  *   post:
  *     summary: Register a new user
  *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fullname
+ *               - phone
+ *               - username
+ *               - password
+ *               - passwordConfirmation
+ *             properties:
+ *               fullname:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               passwordConfirmation:
+ *                 type: string
+ *     responses:
+ *       '201':
+ *         description: User registered successfully
+ *       '400':
+ *         description: Bad request - missing or invalid fields
+ *       '500':
+ *         description: Internal server error
  */
 router.post('/register', async (req, res) => {
-    const { fullname, phone, username, password, passwordConfirmation } = req.body;
+    const body = req.body || {};
+    const { fullname, phone, username, password, passwordConfirmation } = body;
     if (!fullname || !phone || !username || !password || !passwordConfirmation) {
         return res.status(400).json({ status: 'error', message: 'All fields are required.' });
     }
@@ -38,14 +69,37 @@ router.post('/register', async (req, res) => {
 
 
 /**
- * @swagger
+ * @openapi
  * /api/login:
  *   post:
  *     summary: Login a user
  *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: Username or phone
+ *               password:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Login successful
+ *       '400':
+ *         description: Invalid credentials or missing fields
+ *       '500':
+ *         description: Internal server error
  */
 router.post('/login', async (req, res) => {
-    const { username, password } = req.body;
+    const body = req.body || {};
+    const { username, password } = body;
     if (!username || !password) {
         return res.status(400).json({ status: 'error', message: 'Username/phone and password are required.' });
     }

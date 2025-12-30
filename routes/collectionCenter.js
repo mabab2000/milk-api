@@ -3,16 +3,59 @@ const router = express.Router();
 const pool = require('../db');
 const { v4: uuidv4 } = require('uuid');
 
+const isValidUUID = (id) => {
+    return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id);
+};
+
 /**
- * @swagger
+ * @openapi
  * /api/collection-center/{id}:
  *   patch:
  *     summary: Update a collection center
  *     tags: [CollectionCenter]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Collection center ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               code:
+ *                 type: string
+ *               manager:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               location:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Collection center updated successfully
+ *       '400':
+ *         description: Bad request - invalid id or no fields to update
+ *       '404':
+ *         description: Collection center not found
+ *       '500':
+ *         description: Internal server error
  */
 router.patch('/collection-center/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, code, manager, phone, price, location } = req.body;
+    if (!isValidUUID(id)) {
+        return res.status(400).json({ status: 'error', message: 'Invalid collection center id.' });
+    }
+    const body = req.body || {};
+    const { name, code, manager, phone, price, location } = body;
     try {
         const center = await pool.query('SELECT * FROM collection_center WHERE id = $1', [id]);
         if (center.rows.length === 0) {
@@ -42,14 +85,33 @@ router.patch('/collection-center/:id', async (req, res) => {
 
 
 /**
- * @swagger
+ * @openapi
  * /api/collection-center/{id}:
  *   delete:
  *     summary: Delete a collection center
  *     tags: [CollectionCenter]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Collection center ID
+ *     responses:
+ *       '200':
+ *         description: Collection center deleted successfully
+ *       '400':
+ *         description: Bad request - invalid id
+ *       '404':
+ *         description: Collection center not found
+ *       '500':
+ *         description: Internal server error
  */
 router.delete('/collection-center/:id', async (req, res) => {
     const { id } = req.params;
+    if (!isValidUUID(id)) {
+        return res.status(400).json({ status: 'error', message: 'Invalid collection center id.' });
+    }
     try {
         const del = await pool.query('DELETE FROM collection_center WHERE id = $1 RETURNING *', [id]);
         if (del.rows.length === 0) {
@@ -64,11 +126,16 @@ router.delete('/collection-center/:id', async (req, res) => {
 
 
 /**
- * @swagger
+ * @openapi
  * /api/collection-centers:
  *   get:
  *     summary: Get all collection centers
  *     tags: [CollectionCenter]
+ *     responses:
+ *       '200':
+ *         description: A list of collection centers
+ *       '500':
+ *         description: Internal server error
  */
 router.get('/collection-centers', async (req, res) => {
     try {
@@ -82,14 +149,48 @@ router.get('/collection-centers', async (req, res) => {
 
 
 /**
- * @swagger
+ * @openapi
  * /api/collection-center:
  *   post:
  *     summary: Create a new collection center
  *     tags: [CollectionCenter]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - code
+ *               - manager
+ *               - phone
+ *               - price
+ *               - location
+ *             properties:
+ *               name:
+ *                 type: string
+ *               code:
+ *                 type: string
+ *               manager:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               location:
+ *                 type: string
+ *     responses:
+ *       '201':
+ *         description: Collection center created successfully
+ *       '400':
+ *         description: Bad request - missing or duplicate fields
+ *       '500':
+ *         description: Internal server error
  */
 router.post('/collection-center', async (req, res) => {
-    const { name, code, manager, phone, price, location } = req.body;
+    const body = req.body || {};
+    const { name, code, manager, phone, price, location } = body;
     if (!name || !code || !manager || !phone || price === undefined || !location) {
         return res.status(400).json({ status: 'error', message: 'All fields are required.' });
     }

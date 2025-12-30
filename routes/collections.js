@@ -4,14 +4,41 @@ const pool = require('../db');
 const { v4: uuidv4 } = require('uuid');
 
 /**
- * @swagger
+ * @openapi
  * /api/created-collection:
  *   post:
  *     summary: Record a created collection
  *     tags: [Collection]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - collection_center_id
+ *               - user_id
+ *               - quantity
+ *             properties:
+ *               collection_center_id:
+ *                 type: string
+ *               user_id:
+ *                 type: string
+ *               quantity:
+ *                 type: number
+ *               quality:
+ *                 type: string
+ *     responses:
+ *       '201':
+ *         description: Created collection recorded successfully
+ *       '400':
+ *         description: Bad request - missing or invalid fields
+ *       '500':
+ *         description: Internal server error
  */
 router.post('/created-collection', async (req, res) => {
-    const { collection_center_id, user_id, quantity, quality } = req.body;
+    const body = req.body || {};
+    const { collection_center_id, user_id, quantity, quality } = body;
     if (!collection_center_id || !user_id || quantity === undefined) {
         return res.status(400).json({ status: 'error', message: 'collection_center_id, user_id and quantity are required.' });
     }
@@ -37,11 +64,16 @@ router.post('/created-collection', async (req, res) => {
 
 
 /**
- * @swagger
+ * @openapi
  * /api/created-collections/recent:
  *   get:
  *     summary: Get the most recent three created collections
  *     tags: [Collection]
+ *     responses:
+ *       '200':
+ *         description: Recent created collections list
+ *       '500':
+ *         description: Internal server error
  */
 router.get('/created-collections/recent', async (req, res) => {
     try {

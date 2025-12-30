@@ -3,11 +3,25 @@ const router = express.Router();
 const pool = require('../db');
 
 /**
- * @swagger
+ * @openapi
  * /api/user/{id}/role:
  *   patch:
  *     summary: Update user role to admin
  *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       '200':
+ *         description: User role updated to admin
+ *       '404':
+ *         description: User not found
+ *       '500':
+ *         description: Internal server error
  */
 router.patch('/user/:id/role', async (req, res) => {
     const { id } = req.params;
@@ -26,11 +40,16 @@ router.patch('/user/:id/role', async (req, res) => {
 
 
 /**
- * @swagger
+ * @openapi
  * /api/users:
  *   get:
  *     summary: Get all users information
  *     tags: [User]
+ *     responses:
+ *       '200':
+ *         description: List of users
+ *       '500':
+ *         description: Internal server error
  */
 router.get('/users', async (req, res) => {
     try {
@@ -44,11 +63,16 @@ router.get('/users', async (req, res) => {
 
 
 /**
- * @swagger
+ * @openapi
  * /api/user-names:
  *   get:
  *     summary: Get all user names and ids
  *     tags: [User]
+ *     responses:
+ *       '200':
+ *         description: List of user ids and fullnames
+ *       '500':
+ *         description: Internal server error
  */
 router.get('/user-names', async (req, res) => {
     try {

@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -22,6 +21,9 @@ migrate().then(() => {
 	process.exit(1);
 });
 
+// Register endpoint
+app.use('/api', registerRouter);
+
 // Swagger setup
 const swaggerOptions = {
 	definition: {
@@ -32,16 +34,13 @@ const swaggerOptions = {
 			description: 'API documentation for Milk Collection endpoints',
 		},
 	},
-	apis: ['./register.js', './routes/*.js'],
+	apis: ['./routes/*.js'],
 };
+
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-// Register endpoint
-app.use('/api', registerRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
-	console.log(`Swagger docs at http://localhost:${PORT}/api-docs`);
 });
