@@ -74,7 +74,12 @@ router.post('/payment', async (req, res) => {
  */
 router.get('/payments', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM payments ORDER BY created_at DESC');
+    const result = await pool.query(
+      `SELECT p.*, r.fullname AS farmer_name, r.phone AS farmer_phone
+       FROM payments p
+       LEFT JOIN register r ON p.farmer_id = r.id
+       ORDER BY p.created_at DESC`
+    );
     res.status(200).json({ status: 'success', payments: result.rows });
   } catch (err) {
     console.error(err);
