@@ -49,6 +49,19 @@ async function migrate() {
     );
   `;
   await pool.query(createCreatedCollectionTableQuery);
+
+  // Create payments table
+  const createPaymentsTableQuery = `
+    CREATE TABLE IF NOT EXISTS payments (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      farmer_id UUID NOT NULL REFERENCES register(id) ON DELETE CASCADE,
+      quantity NUMERIC(12,2) NOT NULL,
+      amount NUMERIC(12,2) NOT NULL,
+      payment_method VARCHAR(100) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+  await pool.query(createPaymentsTableQuery);
 }
 
 module.exports = migrate;
