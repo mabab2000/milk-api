@@ -66,17 +66,29 @@ router.get('/users', async (req, res) => {
  * @openapi
  * /api/user-names:
  *   get:
- *     summary: Get all user names and ids
+ *     summary: Get all user names, ids, total collected quantity, and unit price from collection center
  *     tags: [User]
  *     responses:
  *       '200':
- *         description: List of user ids and fullnames
+ *         description: List of user ids, fullnames, summed quantities, and unit price from collection center
  *       '500':
  *         description: Internal server error
  */
 router.get('/user-names', async (req, res) => {
     try {
-        const result = await pool.query("SELECT id, fullname FROM register WHERE role = 'user'");
+        const result = await pool.query(`
+            SELECT
+                r.id,
+                r.fullname,
+                COALESCE(SUM(cc.quantity), 0)::float AS total_quantity,
+                COALESCE(MAX(c.price), 0)::float AS unit_price
+            FROM register r
+            LEFT JOIN created_collection cc ON cc.user_id = r.id
+            LEFT JOIN collection_center c ON c.id = cc.collection_center_id
+            WHERE r.role = 'user'
+            GROUP BY r.id, r.fullname
+            ORDER BY r.fullname
+        `);
         res.status(200).json({ status: 'success', users: result.rows });
     } catch (err) {
         console.error(err);
